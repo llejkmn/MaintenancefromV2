@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ระบบแจ้งซ่อมบำรุง V2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0c12;
+  --surface: #13161f;
+  --surface2: #1c2030;
+  --surface3: #242840;
+  --border: #2a2f45;
+  --border2: #353b55;
+  --accent: #f59e0b;
+  --accent-dim: rgba(245,158,11,0.12);
+  --blue: #3b82f6;
+  --blue-dim: rgba(59,130,246,0.12);
+  --green: #10b981;
+  --green-dim: rgba(16,185,129,0.12);
+  --red: #ef4444;
+  --red-dim: rgba(239,68,68,0.12);
+  --orange: #f97316;
+  --text: #e2e5f0;
+  --text-muted: #6b7299;
+  --text-dim: #3d4268;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-xs: 6px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+ 
+/* ══════════════════════════════
+   PAGE SYSTEM
+══════════════════════════════ */
+.page{display:none;min-height:100vh;animation:fadeIn 0.3s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+ 
+/* ══════════════════════════════
+   SHARED HEADER
+══════════════════════════════ */
+.header{
+  background:linear-gradient(180deg,var(--surface) 0%,rgba(19,22,31,0) 100%);
+  padding:20px 20px 0;
+  position:sticky;top:0;z-index:50;
+}
+.header-inner{
+  display:flex;align-items:center;gap:12px;
+  padding-bottom:16px;
+  border-bottom:1px solid var(--border);
+}
+.logo-box{
+  width:42px;height:42px;border-radius:12px;
+  background:linear-gradient(135deg,var(--accent),var(--orange));
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;flex-shrink:0;
+  box-shadow:0 4px 16px rgba(245,158,11,0.3);
+}
+.header-text h1{font-size:16px;font-weight:700;letter-spacing:0.3px}
+.header-text p{font-size:11px;color:var(--text-muted);font-family:'IBM Plex Mono',monospace;margin-top:1px}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.user-chip{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:20px;padding:5px 10px 5px 6px;
+  display:flex;align-items:center;gap:6px;
+  font-size:12px;color:var(--text-muted);
+}
+.user-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.logout-btn{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:8px;padding:6px 10px;
+  font-size:12px;color:var(--text-muted);cursor:pointer;
+  font-family:'Sarabun',sans-serif;
+  transition:all 0.2s;
+}
+.logout-btn:active{background:var(--red-dim);border-color:var(--red);color:var(--red)}
+ 
+/* ══════════════════════════════
+   PAGE 1: LOGIN
+══════════════════════════════ */
+#page-login{
+  display:flex;flex-direction:column;
+  justify-content:center;align-items:center;
+  min-height:100vh;padding:32px 24px;
+  background:radial-gradient(ellipse at 50% 0%,rgba(59,130,246,0.08) 0%,transparent 70%);
+}
+.login-logo{
+  width:72px;height:72px;border-radius:20px;
+  background:linear-gradient(135deg,var(--accent),var(--orange));
+  display:flex;align-items:center;justify-content:center;
+  font-size:34px;margin-bottom:20px;
+  box-shadow:0 8px 32px rgba(245,158,11,0.35);
+}
+.login-title{font-size:22px;font-weight:700;text-align:center;margin-bottom:4px}
+.login-sub{font-size:13px;color:var(--text-muted);text-align:center;margin-bottom:32px;font-family:'IBM Plex Mono',monospace}
+.login-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:24px;width:100%;max-width:360px;
+}
+.field-label{font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:8px;display:block}
+.field-input{
+  width:100%;background:var(--surface2);border:2px solid var(--border);
+  border-radius:var(--radius-sm);padding:14px;
+  color:var(--text);font-family:'Sarabun',sans-serif;font-size:15px;
+  transition:border-color 0.2s;margin-bottom:16px;
+}
+.field-input:focus{outline:none;border-color:var(--blue)}
+.field-input::placeholder{color:var(--text-dim)}
+.login-btn{
+  width:100%;background:linear-gradient(135deg,var(--blue),#1d4ed8);
+  border:none;border-radius:var(--radius-sm);padding:16px;
+  font-family:'Sarabun',sans-serif;font-size:16px;font-weight:700;
+  color:#fff;cursor:pointer;transition:all 0.2s;
+  box-shadow:0 4px 20px rgba(59,130,246,0.35);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.login-btn:active{transform:scale(0.97)}
+.login-btn:disabled{background:var(--surface2);color:var(--text-dim);box-shadow:none}
+.login-error{
+  background:var(--red-dim);border:1px solid rgba(239,68,68,0.3);
+  border-radius:var(--radius-xs);padding:10px 14px;
+  font-size:13px;color:#f87171;margin-top:12px;display:none;text-align:center;
+}
+.login-error.show{display:block}
+.role-hint{
+  margin-top:20px;padding:14px;background:var(--surface2);
+  border:1px solid var(--border);border-radius:var(--radius-sm);
+  font-size:12px;color:var(--text-muted);line-height:1.8;
+}
+.role-hint strong{color:var(--text)}
+ 
+/* ══════════════════════════════
+   PAGE 2: REPORTER FORM
+══════════════════════════════ */
+#page-reporter{padding-bottom:40px}
+.form-wrap{padding:16px;display:flex;flex-direction:column;gap:14px}
+.section{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;transition:border-color 0.2s;
+}
+.section.filled{border-color:rgba(16,185,129,0.4)}
+.section-header{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 16px 10px;border-bottom:1px solid var(--border);
+}
+.step-num{
+  width:26px;height:26px;border-radius:50%;
+  background:var(--surface2);border:2px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;color:var(--text-muted);
+  font-family:'IBM Plex Mono',monospace;flex-shrink:0;transition:all 0.3s;
+}
+.section.filled .step-num{background:var(--green);border-color:var(--green);color:#fff}
+.section-title{font-size:14px;font-weight:600}
+.section-icon{font-size:17px}
+.section-body{padding:14px 16px}
+ 
+/* worker grid */
+.worker-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.worker-btn{
+  background:var(--surface2);border:2px solid var(--border);
+  border-radius:var(--radius-sm);padding:14px 10px;
+  text-align:center;cursor:pointer;transition:all 0.2s;position:relative;
+}
+.worker-btn:active{transform:scale(0.96)}
+.worker-btn.selected{border-color:var(--accent);background:var(--accent-dim)}
+.worker-avatar{
+  width:44px;height:44px;border-radius:50%;margin:0 auto 8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;background:var(--surface);border:2px solid var(--border);transition:all 0.2s;
+}
+.worker-btn.selected .worker-avatar{border-color:var(--accent)}
+.worker-name{font-size:14px;font-weight:600;display:block}
+.worker-role-tag{font-size:11px;color:var(--text-muted);display:block;margin-top:2px}
+.worker-btn.selected .worker-name{color:var(--accent)}
+.w-check{
+  position:absolute;top:8px;right:8px;width:18px;height:18px;
+  background:var(--accent);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;color:#000;opacity:0;transform:scale(0);transition:all 0.2s;
+}
+.worker-btn.selected .w-check{opacity:1;transform:scale(1)}
+ 
+/* dept + machine */
+.dept-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.dept-btn{
+  background:var(--surface2);border:2px solid var(--border);
+  border-radius:var(--radius-sm);padding:12px 8px;
+  text-align:center;cursor:pointer;transition:all 0.2s;
+}
+.dept-btn:active{transform:scale(0.96)}
+.dept-btn.selected{border-color:var(--blue);background:var(--blue-dim)}
+.dept-btn .di{font-size:22px;display:block;margin-bottom:4px}
+.dept-btn .dn{font-size:12px;font-weight:600}
+.dept-btn.selected .dn{color:var(--blue)}
+.machine-select-wrap{position:relative}
+.machine-select-wrap select{
+  width:100%;background:var(--surface2);border:2px solid var(--border);
+  border-radius:var(--radius-sm);padding:14px 40px 14px 14px;
+  color:var(--text);font-family:'Sarabun',sans-serif;font-size:14px;
+  appearance:none;cursor:pointer;transition:border-color 0.2s;
+}
+.machine-select-wrap select:focus{outline:none;border-color:var(--blue)}
+.machine-select-wrap select option{background:var(--surface2)}
+.sel-arrow{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none;font-size:11px}
+.machine-placeholder{
+  background:var(--surface2);border:2px dashed var(--border);
+  border-radius:var(--radius-sm);padding:16px;text-align:center;
+  color:var(--text-dim);font-size:13px;
+}
+ 
+/* job type */
+.job-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.job-btn{
+  background:var(--surface2);border:2px solid var(--border);
+  border-radius:var(--radius-sm);padding:14px 8px;
+  text-align:center;cursor:pointer;transition:all 0.2s;
+}
+.job-btn:active{transform:scale(0.96)}
+.job-btn .ji{font-size:22px;display:block;margin-bottom:6px}
+.job-btn .jl{font-size:12px;font-weight:700}
+.job-btn .js{font-size:10px;color:var(--text-muted);margin-top:2px}
+.job-btn[data-type="PM"].selected{border-color:var(--green);background:var(--green-dim)}
+.job-btn[data-type="PM"].selected .jl{color:var(--green)}
+.job-btn[data-type="Breakdown"].selected{border-color:var(--red);background:var(--red-dim)}
+.job-btn[data-type="Breakdown"].selected .jl{color:var(--red)}
+.job-btn[data-type="Corrective"].selected{border-color:var(--accent);background:var(--accent-dim)}
+.job-btn[data-type="Corrective"].selected .jl{color:var(--accent)}
+ 
+/* symptoms */
+.symptom-list{display:flex;flex-direction:column;gap:8px}
+.symptom-item{
+  background:var(--surface2);border:2px solid var(--border);
+  border-radius:var(--radius-sm);padding:12px 14px;
+  display:flex;align-items:center;gap:12px;cursor:pointer;transition:all 0.2s;
+}
+.symptom-item:active{transform:scale(0.98)}
+.symptom-item.checked{border-color:var(--accent);background:var(--accent-dim)}
+.s-check{
+  width:22px;height:22px;border:2px solid var(--border);border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;transition:all 0.2s;font-size:12px;
+}
+.symptom-item.checked .s-check{background:var(--accent);border-color:var(--accent);color:#000}
+.s-icon{font-size:18px;flex-shrink:0}
+.s-text{font-size:14px;font-weight:500;flex:1}
+textarea{
+  width:100%;background:var(--surface2);border:2px solid var(--border);
+  border-radius:var(--radius-sm);padding:14px;color:var(--text);
+  font-family:'Sarabun',sans-serif;font-size:14px;resize:none;
+  transition:border-color 0.2s;line-height:1.6;
+}
+textarea:focus{outline:none;border-color:var(--blue)}
+textarea::placeholder{color:var(--text-dim)}
+ 
+/* submit */
+.submit-wrap{padding:0 16px}
+.submit-btn{
+  width:100%;background:linear-gradient(135deg,var(--accent),var(--orange));
+  border:none;border-radius:var(--radius);padding:18px;
+  font-family:'Sarabun',sans-serif;font-size:17px;font-weight:700;
+  color:#000;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;
+  transition:all 0.2s;box-shadow:0 4px 20px rgba(245,158,11,0.3);
+}
+.submit-btn:active{transform:scale(0.97)}
+.submit-btn:disabled{background:var(--surface2);color:var(--text-dim);box-shadow:none;transform:none}
+.validate-msg{
+  background:var(--red-dim);border:1px solid rgba(239,68,68,0.3);
+  border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;color:#f87171;
+  display:none;margin:0 16px 8px;
+}
+.validate-msg.show{display:block}
+ 
+/* ══════════════════════════════
+   PAGE 3: JOB BOARD (ช่าง)
+══════════════════════════════ */
+#page-jobboard{padding-bottom:40px}
+.board-body{padding:16px;display:flex;flex-direction:column;gap:12px}
+.board-stats{
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:4px;
+}
+.stat-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:14px 10px;text-align:center;
+}
+.stat-num{font-size:22px;font-weight:700;font-family:'IBM Plex Mono',monospace}
+.stat-label{font-size:11px;color:var(--text-muted);margin-top:2px}
+.stat-card.pending .stat-num{color:var(--accent)}
+.stat-card.inprog .stat-num{color:var(--blue)}
+.stat-card.done .stat-num{color:var(--green)}
+ 
+.section-label{
+  font-size:12px;font-weight:700;color:var(--text-muted);
+  letter-spacing:1px;text-transform:uppercase;
+  font-family:'IBM Plex Mono',monospace;
+  padding:4px 0;
+}
+.job-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:16px;cursor:pointer;
+  transition:all 0.2s;position:relative;overflow:hidden;
+}
+.job-card::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:var(--accent);
+}
+.job-card:active{transform:scale(0.98)}
+.job-card:hover{border-color:var(--border2)}
+.job-card-top{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px}
+.job-status-badge{
+  padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;
+  flex-shrink:0;font-family:'IBM Plex Mono',monospace;
+}
+.badge-pending{background:var(--accent-dim);color:var(--accent);border:1px solid rgba(245,158,11,0.3)}
+.badge-inprogress{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(59,130,246,0.3)}
+.badge-success{background:var(--green-dim);color:var(--green);border:1px solid rgba(16,185,129,0.3)}
+.job-time{font-size:11px;color:var(--text-dim);margin-left:auto;font-family:'IBM Plex Mono',monospace}
+.job-machine{font-size:15px;font-weight:700;margin-bottom:4px}
+.job-dept{
+  display:inline-flex;align-items:center;gap:4px;
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:4px;padding:2px 8px;font-size:11px;color:var(--text-muted);
+  margin-bottom:8px;
+}
+.job-meta{display:flex;gap:8px;flex-wrap:wrap}
+.job-tag{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:4px;padding:3px 8px;font-size:12px;color:var(--text-muted);
+}
+.job-tag.type-PM{color:var(--green)}
+.job-tag.type-Breakdown{color:var(--red)}
+.job-tag.type-Corrective{color:var(--accent)}
+.job-reporter{font-size:12px;color:var(--text-muted);margin-top:6px}
+.job-card-arrow{
+  position:absolute;right:16px;bottom:16px;
+  font-size:18px;color:var(--text-dim);
+}
+.empty-state{
+  text-align:center;padding:48px 24px;color:var(--text-muted);
+}
+.empty-state .empty-icon{font-size:48px;margin-bottom:12px}
+.empty-state p{font-size:14px}
+.refresh-btn{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:12px;width:100%;
+  font-family:'Sarabun',sans-serif;font-size:14px;color:var(--text-muted);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:all 0.2s;
+}
+.refresh-btn:active{background:var(--surface2)}
+ 
+/* ══════════════════════════════
+   PAGE 4: REPAIR LOG (ปิดงาน)
+══════════════════════════════ */
+#page-repairlog{padding-bottom:40px}
+.repair-body{padding:16px;display:flex;flex-direction:column;gap:14px}
+.job-summary-card{
+  background:linear-gradient(135deg,var(--surface2),var(--surface));
+  border:1px solid var(--border2);border-radius:var(--radius);padding:16px;
+}
+.job-summary-title{font-size:11px;color:var(--text-muted);font-family:'IBM Plex Mono',monospace;margin-bottom:10px;letter-spacing:1px}
+.job-summary-machine{font-size:18px;font-weight:700;margin-bottom:6px}
+.job-summary-row{display:flex;gap:8px;flex-wrap:wrap}
+.back-btn{
+  display:flex;align-items:center;gap:6px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:10px 14px;
+  font-family:'Sarabun',sans-serif;font-size:13px;color:var(--text-muted);
+  cursor:pointer;width:fit-content;transition:all 0.2s;margin:16px 16px 0;
+}
+.back-btn:active{background:var(--surface2)}
+.close-btn{
+  width:100%;background:linear-gradient(135deg,var(--green),#059669);
+  border:none;border-radius:var(--radius);padding:18px;
+  font-family:'Sarabun',sans-serif;font-size:17px;font-weight:700;
+  color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;
+  transition:all 0.2s;box-shadow:0 4px 20px rgba(16,185,129,0.3);
+}
+.close-btn:active{transform:scale(0.97)}
+.close-btn:disabled{background:var(--surface2);color:var(--text-dim);box-shadow:none;transform:none}
+ 
+/* ══════════════════════════════
+   TIMESTAMP BAR
+══════════════════════════════ */
+.ts-bar{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:8px 12px;
+  display:flex;align-items:center;gap:8px;margin:12px 16px 0;
+}
+.ts-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+.ts-text{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--green);flex:1}
+.ts-label{font-size:11px;color:var(--text-muted)}
+ 
+/* ══════════════════════════════
+   TOAST
+══════════════════════════════ */
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);
+  border-radius:var(--radius);padding:14px 24px;font-size:15px;font-weight:600;
+  display:flex;align-items:center;gap:10px;z-index:999;white-space:nowrap;
+  transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+.toast.success{background:var(--green);color:#fff;box-shadow:0 8px 32px rgba(16,185,129,0.4)}
+.toast.error{background:var(--red);color:#fff;box-shadow:0 8px 32px rgba(239,68,68,0.4)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.spinner{width:20px;height:20px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+ 
+<!-- ══════════════════════════════
+     PAGE 1: LOGIN
+══════════════════════════════ -->
+<div class="page active" id="page-login">
+  <div class="login-logo">⚙️</div>
+  <div class="login-title">ระบบซ่อมบำรุง V2</div>
+  <div class="login-sub">Palm Oil Mill · Maintenance System</div>
+ 
+  <div class="login-card">
+    <label class="field-label">👤 ชื่อผู้ใช้ (Username)</label>
+    <input class="field-input" id="login-user" type="text" placeholder="เช่น prod01 หรือ tech01" autocomplete="off" />
+ 
+    <label class="field-label">🔒 รหัสผ่าน (Password)</label>
+    <input class="field-input" id="login-pass" type="password" placeholder="รหัสผ่าน" />
+ 
+    <button class="login-btn" id="login-btn" onclick="doLogin()">
+      <span>🚀</span> เข้าสู่ระบบ
+    </button>
+    <div class="login-error" id="login-error">❌ ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</div>
+  </div>
+ 
+  <div class="role-hint" style="max-width:360px;width:100%;margin-top:16px">
+    <strong>สิทธิ์การเข้าใช้งาน:</strong><br>
+    🔵 <strong>Reporter</strong> — ฝ่ายผลิต / ผู้ตรวจ → แจ้งซ่อม<br>
+    🔧 <strong>Technician</strong> — ช่างซ่อมบำรุง → รับและปิดงาน
+  </div>
+</div>
+ 
+<!-- ══════════════════════════════
+     PAGE 2: REPORTER (แจ้งซ่อม)
+══════════════════════════════ -->
+<div class="page" id="page-reporter">
+  <div class="header">
+    <div class="header-inner">
+      <div class="logo-box">📝</div>
+      <div class="header-text">
+        <h1>แจ้งซ่อมบำรุง</h1>
+        <p>Reporter · แจ้งงานใหม่</p>
+      </div>
+      <div class="header-right">
+        <div class="user-chip"><div class="user-dot"></div><span id="reporter-name">-</span></div>
+        <button class="logout-btn" onclick="doLogout()">ออก</button>
+      </div>
+    </div>
+    <div class="ts-bar">
+      <div class="ts-dot"></div>
+      <span class="ts-text" id="ts-reporter">-</span>
+      <span class="ts-label">เวลาปัจจุบัน</span>
+    </div>
+  </div>
+ 
+  <div class="form-wrap" id="reporter-form">
+ 
+    <!-- ขั้นที่ 1: เลือกเครื่องจักร -->
+    <div class="section" id="sec-machine">
+      <div class="section-header">
+        <div class="step-num" id="sn-1">1</div>
+        <span class="section-icon">🏭</span>
+        <span class="section-title">เลือกแผนก → เครื่องจักร</span>
+      </div>
+      <div class="section-body">
+        <div class="dept-grid">
+          <div class="dept-btn" onclick="selectDept(this,'ลานเท')"><span class="di">🌴</span><div class="dn">ลานเท</div></div>
+          <div class="dept-btn" onclick="selectDept(this,'นึ่ง-ย่อย')"><span class="di">♨️</span><div class="dn">นึ่ง-ย่อย</div></div>
+          <div class="dept-btn" onclick="selectDept(this,'ไอน้ำ-ไฟฟ้า')"><span class="di">⚡</span><div class="dn">ไอน้ำ-ไฟฟ้า</div></div>
+          <div class="dept-btn" onclick="selectDept(this,'แยกน้ำมัน-เมล็ดใน')"><span class="di">🛢️</span><div class="dn">แยกน้ำมัน-เมล็ดใน</div></div>
+        </div>
+        <div id="machine-wrap"><div class="machine-placeholder">← เลือกแผนกก่อน</div></div>
+      </div>
+    </div>
+ 
+    <!-- ขั้นที่ 2: มอบหมายช่าง -->
+    <div class="section" id="sec-worker">
+      <div class="section-header">
+        <div class="step-num" id="sn-2">2</div>
+        <span class="section-icon">👷</span>
+        <span class="section-title">มอบหมายให้ช่าง</span>
+      </div>
+      <div class="section-body">
+        <div class="worker-grid">
+          <div class="worker-btn" onclick="selectWorker(this,'ช่างวิชัย')">
+            <div class="w-check">✓</div>
+            <div class="worker-avatar">👨‍🔧</div>
+            <span class="worker-name">ช่างวิชัย</span>
+            <span class="worker-role-tag">ช่างไฟฟ้า</span>
+          </div>
+          <div class="worker-btn" onclick="selectWorker(this,'ช่างสมชาย')">
+            <div class="w-check">✓</div>
+            <div class="worker-avatar">🧑‍🔧</div>
+            <span class="worker-name">ช่างสมชาย</span>
+            <span class="worker-role-tag">ช่างเครื่องกล</span>
+          </div>
+          <div class="worker-btn" onclick="selectWorker(this,'ช่างประเสริฐ')">
+            <div class="w-check">✓</div>
+            <div class="worker-avatar">👷‍♂️</div>
+            <span class="worker-name">ช่างประเสริฐ</span>
+            <span class="worker-role-tag">ช่างซ่อมบำรุง</span>
+          </div>
+          <div class="worker-btn" onclick="selectWorker(this,'ช่างสุรชัย')">
+            <div class="w-check">✓</div>
+            <div class="worker-avatar">🔩</div>
+            <span class="worker-name">ช่างสุรชัย</span>
+            <span class="worker-role-tag">ช่างเชื่อม</span>
+          </div>
+        </div>
+      </div>
+    </div>
+ 
+    <!-- ขั้นที่ 3: ประเภทงาน -->
+    <div class="section" id="sec-jobtype">
+      <div class="section-header">
+        <div class="step-num" id="sn-3">3</div>
+        <span class="section-icon">🔨</span>
+        <span class="section-title">ประเภทงาน</span>
+      </div>
+      <div class="section-body">
+        <div class="job-grid">
+          <div class="job-btn" data-type="PM" onclick="selectJob(this)"><span class="ji">🛡️</span><div class="jl">PM</div><div class="js">Preventive</div></div>
+          <div class="job-btn" data-type="Breakdown" onclick="selectJob(this)"><span class="ji">🚨</span><div class="jl">Breakdown</div><div class="js">เสียฉุกเฉิน</div></div>
+          <div class="job-btn" data-type="Corrective" onclick="selectJob(this)"><span class="ji">🔧</span><div class="jl">Corrective</div><div class="js">ปรับปรุง</div></div>
+        </div>
+      </div>
+    </div>
+ 
+    <!-- ขั้นที่ 4: อาการ -->
+    <div class="section" id="sec-symptom">
+      <div class="section-header">
+        <div class="step-num" id="sn-4">4</div>
+        <span class="section-icon">🔍</span>
+        <span class="section-title">อาการที่พบ <span style="font-size:11px;color:var(--text-muted);font-weight:400">(เลือกได้หลายข้อ)</span></span>
+      </div>
+      <div class="section-body">
+        <div class="symptom-list">
+          <div class="symptom-item" onclick="toggleSymptom(this,'มอเตอร์ไม่รัน')"><div class="s-check"></div><span class="s-icon">⚡</span><span class="s-text">มอเตอร์ไม่รัน</span></div>
+          <div class="symptom-item" onclick="toggleSymptom(this,'น้ำมันรั่ว')"><div class="s-check"></div><span class="s-icon">💧</span><span class="s-text">น้ำมันรั่ว</span></div>
+          <div class="symptom-item" onclick="toggleSymptom(this,'สายพานหย่อน/ขาด')"><div class="s-check"></div><span class="s-icon">🔗</span><span class="s-text">สายพานหย่อน / ขาด</span></div>
+          <div class="symptom-item" onclick="toggleSymptom(this,'เสียงดังผิดปกติ')"><div class="s-check"></div><span class="s-icon">🔊</span><span class="s-text">เสียงดังผิดปกติ</span></div>
+          <div class="symptom-item" onclick="toggleSymptom(this,'ความร้อนสูงเกินพิกัด')"><div class="s-check"></div><span class="s-icon">🌡️</span><span class="s-text">ความร้อนสูงเกินพิกัด</span></div>
+          <div class="symptom-item" onclick="toggleSymptom(this,'แรงดันผิดปกติ')"><div class="s-check"></div><span class="s-icon">📊</span><span class="s-text">แรงดันผิดปกติ</span></div>
+          <div class="symptom-item" onclick="toggleSymptom(this,'การสั่นสะเทือนผิดปกติ')"><div class="s-check"></div><span class="s-icon">📳</span><span class="s-text">การสั่นสะเทือนผิดปกติ</span></div>
+        </div>
+      </div>
+    </div>
+ 
+    <!-- ขั้นที่ 5: หมายเหตุ -->
+    <div class="section" id="sec-remark">
+      <div class="section-header">
+        <div class="step-num" id="sn-5">5</div>
+        <span class="section-icon">📝</span>
+        <span class="section-title">หมายเหตุเพิ่มเติม</span>
+      </div>
+      <div class="section-body">
+        <textarea id="remark" rows="4" placeholder="พิมพ์รายละเอียดเพิ่มเติม หรือกดไมค์บนคีย์บอร์ด 🎤"></textarea>
+      </div>
+    </div>
+  </div>
+ 
+  <div class="validate-msg" id="validate-msg">⚠️ กรุณากรอกข้อมูลให้ครบ: เครื่องจักร, ช่าง, ประเภทงาน</div>
+  <div class="submit-wrap" style="margin-bottom:16px">
+    <button class="submit-btn" id="submit-btn" onclick="submitReport()">
+      <span>📤</span> ส่งแจ้งซ่อม
+    </button>
+  </div>
+</div>
+ 
+<!-- ══════════════════════════════
+     PAGE 3: JOB BOARD (ช่าง)
+══════════════════════════════ -->
+<div class="page" id="page-jobboard">
+  <div class="header">
+    <div class="header-inner">
+      <div class="logo-box">📋</div>
+      <div class="header-text">
+        <h1>รายการงานซ่อม</h1>
+        <p>Technician · Job Board</p>
+      </div>
+      <div class="header-right">
+        <div class="user-chip"><div class="user-dot"></div><span id="tech-name">-</span></div>
+        <button class="logout-btn" onclick="doLogout()">ออก</button>
+      </div>
+    </div>
+    <div class="ts-bar">
+      <div class="ts-dot"></div>
+      <span class="ts-text" id="ts-board">-</span>
+      <span class="ts-label">เวลาปัจจุบัน</span>
+    </div>
+  </div>
+ 
+  <div class="board-body">
+    <div class="board-stats">
+      <div class="stat-card pending"><div class="stat-num" id="stat-pending">0</div><div class="stat-label">รอดำเนินการ</div></div>
+      <div class="stat-card inprog"><div class="stat-num" id="stat-inprog">0</div><div class="stat-label">กำลังซ่อม</div></div>
+      <div class="stat-card done"><div class="stat-num" id="stat-done">0</div><div class="stat-label">เสร็จแล้ว</div></div>
+    </div>
+ 
+    <div class="section-label">🔴 งานที่รอดำเนินการ</div>
+    <div id="job-list">
+      <div class="empty-state"><div class="empty-icon">✅</div><p>ไม่มีงานค้างอยู่</p></div>
+    </div>
+ 
+    <button class="refresh-btn" onclick="fetchJobs()">
+      <span>🔄</span> รีเฟรชรายการงาน
+    </button>
+  </div>
+</div>
+ 
+<!-- ══════════════════════════════
+     PAGE 4: REPAIR LOG (ปิดงาน)
+══════════════════════════════ -->
+<div class="page" id="page-repairlog">
+  <button class="back-btn" onclick="showPage('page-jobboard')">← กลับรายการงาน</button>
+ 
+  <div class="header" style="position:relative;margin-top:8px">
+    <div class="header-inner">
+      <div class="logo-box" style="background:linear-gradient(135deg,var(--green),#059669)">🛠️</div>
+      <div class="header-text">
+        <h1>บันทึกผลการซ่อม</h1>
+        <p>Technician · ปิดงาน</p>
+      </div>
+    </div>
+  </div>
+ 
+  <div class="repair-body">
+ 
+    <!-- สรุปงานที่เลือก -->
+    <div class="job-summary-card" id="repair-summary">
+      <div class="job-summary-title">📌 รายละเอียดงาน</div>
+      <div class="job-summary-machine" id="rs-machine">-</div>
+      <div class="job-summary-row" id="rs-tags"></div>
+      <div style="margin-top:8px;font-size:12px;color:var(--text-muted)" id="rs-reporter"></div>
+      <div style="margin-top:4px;font-size:12px;color:var(--text-muted)" id="rs-issues"></div>
+    </div>
+ 
+    <!-- กรอกรายละเอียดการซ่อม -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-icon">📋</span>
+        <span class="section-title">รายละเอียดการซ่อม</span>
+      </div>
+      <div class="section-body">
+        <textarea id="repair-detail" rows="4" placeholder="อธิบายวิธีการซ่อม สิ่งที่แก้ไข..."></textarea>
+      </div>
+    </div>
+ 
+    <!-- อะไหล่ที่ใช้ -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-icon">🔩</span>
+        <span class="section-title">อะไหล่ / วัสดุที่ใช้</span>
+      </div>
+      <div class="section-body">
+        <textarea id="repair-parts" rows="3" placeholder="เช่น Bearing 6205 x2, สายพาน B-65 x1..."></textarea>
+      </div>
+    </div>
+ 
+    <!-- ระยะเวลา -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-icon">⏱️</span>
+        <span class="section-title">ระยะเวลาซ่อม (ชั่วโมง)</span>
+      </div>
+      <div class="section-body">
+        <input class="field-input" id="repair-hours" type="number" placeholder="เช่น 2.5" min="0" step="0.5" style="margin-bottom:0" />
+      </div>
+    </div>
+ 
+    <div class="validate-msg" id="repair-validate-msg">⚠️ กรุณากรอกรายละเอียดการซ่อม</div>
+    <button class="close-btn" id="close-btn" onclick="closeJob()">
+      <span>✅</span> บันทึกและปิดงานซ่อม
+    </button>
+  </div>
+</div>
+ 
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+ 
+<script>
+// ══════════════════════════════════════════════
+// CONFIG — ใส่ GAS URL ของคุณตรงนี้
+// ══════════════════════════════════════════════
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxZcovibX5Zj-qktEvtkn3OJlpaoRdFYzQEILpBCWYcwPBL5r7eDAEBqab2lf_BnCt0gQ/exec';
+// ตัวอย่าง:
+// const GAS_URL = 'https://script.google.com/macros/s/AKfycby.../exec';
+ 
+// ══════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════
+let currentUser = null; // { username, name, role }
+let formState = { dept:'', machine:'', worker:'', jobType:'', symptoms:[], remark:'' };
+let selectedJob = null; // งานที่ช่างเลือก
+ 
+// ══════════════════════════════════════════════
+// MACHINE DATA
+// ══════════════════════════════════════════════
+const machines = {
+  'ลานเท': ['FRUIT LOADING RAMP','Conveyor under loading ramp (49m)','FRUIT LOADING RAMP CONVEYER','FFB Crusher','FFB Cross conveyor (25m)','Conveyor over vertical sterilizer (51m)','FFB recycle conveyor (29m)','Conveyor under vertical sterilizer (41m)','Conveyor over thresher (46m)','Fruit Conveyor over thresher','EFB PRESS','EFB CONVEYOR','HORIZONTAL EMPTY BUNCH CONVEYOR','INCLINED EMPTY BUNCH CONVEYOR','Shredder','Shredder Conveyor','รางลำเลียงเชื้อพลิง','รางลำเลียงเส้นใยเข้าอาคารเก็บ','Flare (เผาก๊าซส่วนเกิน)'],
+  'นึ่ง-ย่อย': ['Sterilizer (หม้อนึ่งปาล์ม)','hydraulic power pack','Sterilizer Blow Down Chamber and pump','Condensate conveyer','VIBRATING SCREEN AND PUMP (กรองกากตะกอน)','Converyor Auto Feeder','THRESHING MECHINE AND CONVEYOR','FRUIT ELEVATOR','FRUIT DISTRIBUTER CONVEYOR','FRUIT RETURN CONVEYOR','UNSTRIP EMPTY BUNCH CONVEYOR','DOUBLE ROLLER CRUSHER','DIGESTER (75HP)','DIGESTER (40HP)','SCREW PRESS AND HYDRULIC PUMP','CAKE BREAKER CONVEYOR (25HP)','CAKE BREAKER CONVEYOR (30HP)','NUT POLISHING DRUM','AUGER CONVERYOR','WET NUT ELEVATOR','WET NUT CONVEYOR ON TOP NUT SILO','NUT SILO + SHACKING GATE','RIPPLE MILL','CONVEYOR UNDER RIPPLE MILL','CRACHED MIXTURE ELEVATOR','FIBRE CYCLONE AND AIRLOCK (105HP)','FIBRE CYCLONE AND AIRLOCK (65HP)','SHELL CYCLONE AND AIRLOCK','Bag Finter (ดักฝุ่น)'],
+  'ไอน้ำ-ไฟฟ้า': ['BOILER (20 ตัน/ชั่วโมง)','BOILER (30 ตัน/ชั่วโมง)','BOILER (45 ตัน/ชั่วโมง)','BOILER WATER TANK','WATER SOFTENER (7.5HP)','WATER SOFTENER (15HP)','DEARATOR AND PUMP','Hot water Tank And Pump (7.5HP)','Hot water Tank Oil Room And Pump','BACK PRESSURE RECIEVER','STEAM TURBINE (C5S-G IV)','STEAM TURBINE GENERATOR (3,400 kw)','DIESEL GENERATOR','BOILER FUEL SCREW CONVEYOR','AUTO FEEDER FUEL CONVEYOR','BOILER FUEL CONVEYOR','SHELL FUEL SCREW CONVEYOR','AIRLOCK BETWEET SHELL CYCLONE','กะพ้อตักใยเข้า boiler (45 ตัน)','SAND FILLTER (5.5HP)','SAND FILLTER (15HP)','CLEAN WATER TANK','WATER CLARIFIER TANK','WATER CLARIFIER PUMP','OVERHEAD WATER TANK','Waste Water Pump (น้ำเสียเข้าบ่อ)','บ่อหมัก'],
+  'แยกน้ำมัน-เมล็ดใน': ['CLARIFICATION STATION','DECANTER GEA CA-501','DECANTER ALFA PANX600','DECANTER AND PUMP (40HP)','SEPARATOR','SAND CYCLONE AND PUMP','OIL PURIFIER (PAPX 307)','OIL PURIFIER (GEA OSC 30)','OIL DRYER','CST AND motor gear','Oil purifier pump','Dry oil pump','DECANTER CAKE CONVEYOR','THICK SLUDGE TANK AND PUMP','VIBRATING SCREEN AND PUMP (Separator)','Reclaimed oil pump','EFB Oil Pump','PURIFIER AND PUMP','CLAYBATH AND PUMP','WET KERNEL CONVEYOR','SHELL CLAYBATH SCREW CONVEYOR','BELT CONVEYOR (เมล็ดใน)','KERNEL SILO AND SHACKING GATE','WET KERNEL ELEVATOR','DRY KERNEL ELEVATOR','CONVEYOR ON TOP KERNEL SILO','DRY KERNEL CONV.','KERNEL BUNKER AND SCREW CONVEYOR','DRY KERNEL ELEVATOR TO BUNKER','KERNEL SILO (เก็บเมล็ดใน)','KERNEL PRESS + KERNEL HOPPER','FILLTER PRESS','FILTER OIL PUMP','VIBRATING SCREEN AND TANK','VIBRATING SCREEN OIL PUMP','GEAR PUMP TO VIBRATING TANK','STORAGE TANK 3000 TON AND PUMP','Waste Water Pump (น้ำเสียเข้าสวน)','Mixed Pump','Siudge Pump','Rejec Conceyor','Dry Nut Conveyor','Dry Nut Elevator']
+};
+ 
+// ══════════════════════════════════════════════
+// TIMESTAMP
+// ══════════════════════════════════════════════
+function nowStr() {
+  const n = new Date(), p = x => String(x).padStart(2,'0');
+  const days = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัส','ศุกร์','เสาร์'];
+  return `วัน${days[n.getDay()]} ${p(n.getDate())}/${p(n.getMonth()+1)}/${n.getFullYear()+543}  ${p(n.getHours())}:${p(n.getMinutes())}:${p(n.getSeconds())}`;
+}
+function nowISO() {
+  const n = new Date(), p = x => String(x).padStart(2,'0');
+  return `${n.getFullYear()}-${p(n.getMonth()+1)}-${p(n.getDate())} ${p(n.getHours())}:${p(n.getMinutes())}:${p(n.getSeconds())}`;
+}
+setInterval(() => {
+  const s = nowStr();
+  ['ts-reporter','ts-board'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = s; });
+}, 1000);
+ 
+// ══════════════════════════════════════════════
+// PAGE ROUTING
+// ══════════════════════════════════════════════
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+ 
+// ══════════════════════════════════════════════
+// LOGIN
+// ══════════════════════════════════════════════
+async function doLogin() {
+  const user = document.getElementById('login-user').value.trim();
+  const pass = document.getElementById('login-pass').value.trim();
+  if (!user || !pass) { showLoginError(); return; }
+ 
+  const btn = document.getElementById('login-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> กำลังตรวจสอบ...';
+ 
+  try {
+    const demoUsers = [
+      { username:'prod01', password:'1234', name:'นายสมศักดิ์ (ฝ่ายผลิต)', role:'Reporter' },
+      { username:'prod02', password:'1234', name:'นางสาวสุดา (ผู้ตรวจ)', role:'Reporter' },
+      { username:'tech01', password:'5678', name:'ช่างสมชาย', role:'Technician' },
+      { username:'tech02', password:'5678', name:'ช่างวิชัย', role:'Technician' },
+      { username:'tech03', password:'5678', name:'ช่างประเสริฐ', role:'Technician' },
+      { username:'tech04', password:'5678', name:'ช่างสุรชัย', role:'Technician' },
+    ];
+    const found = demoUsers.find(u => u.username === user && u.password === pass);
+    if (!found) { showLoginError(); btn.disabled=false; btn.innerHTML='<span>🚀</span> เข้าสู่ระบบ'; return; }
+ 
+    currentUser = found;
+    if (found.role === 'Reporter') {
+      document.getElementById('reporter-name').textContent = found.name;
+      showPage('page-reporter');
+    } else {
+      document.getElementById('tech-name').textContent = found.name;
+      showPage('page-jobboard');
+      fetchJobs();
+    }
+  } catch(e) {
+    showToast('❌ เชื่อมต่อไม่ได้ กรุณาลองใหม่', 'error');
+    btn.disabled=false;
+    btn.innerHTML='<span>🚀</span> เข้าสู่ระบบ';
+  }
+}
+ 
+function showLoginError() {
+  const el = document.getElementById('login-error');
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3000);
+  document.getElementById('login-btn').disabled = false;
+  document.getElementById('login-btn').innerHTML = '<span>🚀</span> เข้าสู่ระบบ';
+}
+ 
+document.getElementById('login-pass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+ 
+function doLogout() {
+  currentUser = null;
+  formState = { dept:'', machine:'', worker:'', jobType:'', symptoms:[], remark:'' };
+  document.getElementById('login-user').value = '';
+  document.getElementById('login-pass').value = '';
+  showPage('page-login');
+}
+ 
+// ══════════════════════════════════════════════
+// REPORTER FORM
+// ══════════════════════════════════════════════
+function selectDept(el, dept) {
+  document.querySelectorAll('.dept-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  formState.dept = dept; formState.machine = '';
+  const wrap = document.getElementById('machine-wrap');
+  wrap.innerHTML = `<div class="machine-select-wrap"><select id="machine-sel" onchange="selectMachine(this)"><option value="">-- เลือกเครื่องจักร --</option>${machines[dept].map(m=>`<option value="${m}">${m}</option>`).join('')}</select><div class="sel-arrow">▼</div></div>`;
+}
+function selectMachine(sel) {
+  formState.machine = sel.value;
+  if(formState.machine) markFilled('sec-machine','sn-1');
+  else document.getElementById('sec-machine').classList.remove('filled');
+}
+function selectWorker(el, name) {
+  document.querySelectorAll('.worker-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected'); formState.worker = name;
+  markFilled('sec-worker','sn-2');
+}
+function selectJob(el) {
+  document.querySelectorAll('.job-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected'); formState.jobType = el.dataset.type;
+  markFilled('sec-jobtype','sn-3');
+}
+function toggleSymptom(el, sym) {
+  el.classList.toggle('checked');
+  const chk = el.querySelector('.s-check');
+  if(el.classList.contains('checked')) { chk.textContent='✓'; if(!formState.symptoms.includes(sym)) formState.symptoms.push(sym); }
+  else { chk.textContent=''; formState.symptoms = formState.symptoms.filter(s=>s!==sym); }
+}
+function markFilled(secId, numId) {
+  document.getElementById(secId).classList.add('filled');
+  document.getElementById(numId).textContent = '✓';
+}
+ 
+async function submitReport() {
+  formState.remark = document.getElementById('remark').value.trim();
+  if (!formState.machine || !formState.worker || !formState.jobType) {
+    const m = document.getElementById('validate-msg'); m.classList.add('show');
+    m.scrollIntoView({behavior:'smooth',block:'center'});
+    setTimeout(() => m.classList.remove('show'), 3500); return;
+  }
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true; btn.innerHTML = '<div class="spinner"></div> กำลังส่ง...';
+  const payload = {
+    action: 'submitJob',
+    timestamp: nowISO(),
+    reporterName: currentUser.name,
+    department: formState.dept,
+    machineName: formState.machine,
+    assignedTo: formState.worker,
+    jobType: formState.jobType,
+    issues: formState.symptoms.join(', ') || '-',
+    remark: formState.remark || '-',
+    status: 'Pending'
+  };
+  try {
+    await fetch(GAS_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain'}, body: JSON.stringify(payload) });
+    showToast('✅ แจ้งซ่อมสำเร็จแล้ว!', 'success');
+    resetReporterForm();
+  } catch(e) {
+    showToast('❌ ส่งข้อมูลไม่สำเร็จ', 'error');
+  } finally {
+    btn.disabled = false; btn.innerHTML = '<span>📤</span> ส่งแจ้งซ่อม';
+  }
+}
+ 
+function resetReporterForm() {
+  formState = { dept:'', machine:'', worker:'', jobType:'', symptoms:[], remark:'' };
+  document.querySelectorAll('.dept-btn,.worker-btn,.job-btn').forEach(b=>b.classList.remove('selected'));
+  document.querySelectorAll('.symptom-item').forEach(b=>{ b.classList.remove('checked'); b.querySelector('.s-check').textContent=''; });
+  document.getElementById('machine-wrap').innerHTML = '<div class="machine-placeholder">← เลือกแผนกก่อน</div>';
+  document.getElementById('remark').value = '';
+  ['sec-machine','sec-worker','sec-jobtype'].forEach(id=>document.getElementById(id).classList.remove('filled'));
+  ['sn-1','sn-2','sn-3'].forEach((id,i)=>{ document.getElementById(id).textContent=i+1; });
+}
+ 
+// ══════════════════════════════════════════════
+// JOB BOARD
+// ══════════════════════════════════════════════
+async function fetchJobs() {
+  const list = document.getElementById('job-list');
+  list.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>กำลังโหลด...</p></div>';
+ 
+  // ── DEMO MODE: ใช้ข้อมูลตัวอย่างก่อน GAS พร้อม ──
+  if (!GAS_URL || GAS_URL === 'YOUR_GAS_URL_HERE') {
+    const mockJobs = [
+      { timestamp:'2026-05-25 10:00', reporterName:'นายสมศักดิ์', department:'ไอน้ำ-ไฟฟ้า', machineName:'BOILER (45 ตัน/ชั่วโมง)', assignedTo:'ช่างสมชาย', jobType:'Breakdown', issues:'เสียงดังผิดปกติ, ความร้อนสูงเกินพิกัด', remark:'เร่งด่วน', status:'Pending', _rowIndex:2 },
+      { timestamp:'2026-05-25 11:30', reporterName:'นางสาวสุดา', department:'ลานเท', machineName:'FFB Crusher', assignedTo:'ช่างวิชัย', jobType:'Corrective', issues:'มอเตอร์ไม่รัน', remark:'-', status:'Pending', _rowIndex:3 },
+      { timestamp:'2026-05-25 09:00', reporterName:'นายสมศักดิ์', department:'นึ่ง-ย่อย', machineName:'Sterilizer (หม้อนึ่งปาล์ม)', assignedTo:'ช่างประเสริฐ', jobType:'PM', issues:'-', remark:'PM รายเดือน', status:'Success', _rowIndex:4 },
+    ];
+    renderJobs(mockJobs);
+    return;
+  }
+ 
+  try {
+    const res = await fetch(GAS_URL + '?action=getJobs', { method:'GET', mode:'cors' });
+    const data = await res.json();
+    renderJobs(data.jobs || []);
+  } catch(e) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><p>โหลดข้อมูลไม่ได้ กดรีเฟรชอีกครั้ง</p></div>';
+  }
+}
+ 
+function renderJobs(jobs) {
+  const myName = currentUser ? currentUser.name : '';
+  const myJobs = jobs.filter(j => j['สถานะ'] === 'Pending' && j['มอบหมายให้'] === myName);
+  document.getElementById('stat-pending').textContent = jobs.filter(j=>j['สถานะ']==='Pending').length;
+  document.getElementById('stat-inprog').textContent = jobs.filter(j=>j['สถานะ']==='InProgress').length;
+  document.getElementById('stat-done').textContent = jobs.filter(j=>j['สถานะ']==='Success').length;
+  const list = document.getElementById('job-list');
+  if (myJobs.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">✅</div><p>ไม่มีงานค้างอยู่สำหรับคุณ</p></div>';
+    return;
+  }
+  list.innerHTML = myJobs.map((j,i) => `
+    <div class="job-card" onclick="openJob(${i})" data-idx="${i}">
+      <div class="job-card-top">
+        <span class="job-status-badge badge-pending">⏳ Pending</span>
+        <span class="job-time">${j['Timestamp'] || ''}</span>
+      </div>
+      <div class="job-machine">${j['เครื่องจักร'] || '-'}</div>
+      <div class="job-dept">🏭 ${j['แผนก'] || '-'}</div>
+      <div class="job-meta">
+        <span class="job-tag type-${j['ประเภทงาน']}">${j['ประเภทงาน'] || '-'}</span>
+        ${j['อาการที่พบ'] && j['อาการที่พบ']!=='-' ? `<span class="job-tag">${j['อาการที่พบ'].split(',')[0]}${j['อาการที่พบ'].includes(',')?'...':''}</span>` : ''}
+      </div>
+      <div class="job-reporter">👤 แจ้งโดย: ${j['ผู้แจ้ง'] || '-'}</div>
+      <div class="job-card-arrow">→</div>
+    </div>
+  `).join('');
+  // store jobs globally for openJob
+  window._jobs = myJobs;
+}
+ 
+function openJob(idx) {
+  selectedJob = window._jobs[idx];
+  selectedJob._idx = idx;
+  // fill summary
+  document.getElementById('rs-machine').textContent = selectedJob['เครื่องจักร'] || '-';
+  const tags = document.getElementById('rs-tags');
+  tags.innerHTML = `<span class="job-tag type-${selectedJob['ประเภทงาน']}">${selectedJob['ประเภทงาน']}</span><span class="job-tag">🏭 ${selectedJob['แผนก']}</span>`;
+  document.getElementById('rs-reporter').textContent = `แจ้งโดย: ${selectedJob['ผู้แจ้ง'] || '-'}  |  ${selectedJob['Timestamp'] || ''}`;
+  document.getElementById('rs-issues').textContent = selectedJob['อาการที่พบ'] && selectedJob['อาการที่พบ']!=='-' ? `อาการ: ${selectedJob['อาการที่พบ']}` : '';
+  document.getElementById('repair-detail').value = '';
+  document.getElementById('repair-parts').value = '';
+  document.getElementById('repair-hours').value = '';
+  showPage('page-repairlog');
+}
+ 
+// ══════════════════════════════════════════════
+// CLOSE JOB
+// ══════════════════════════════════════════════
+async function closeJob() {
+  const detail = document.getElementById('repair-detail').value.trim();
+  if (!detail) {
+    const m = document.getElementById('repair-validate-msg'); m.classList.add('show');
+    setTimeout(()=>m.classList.remove('show'),3000); return;
+  }
+  const btn = document.getElementById('close-btn');
+  btn.disabled = true; btn.innerHTML = '<div class="spinner"></div> กำลังบันทึก...';
+  const payload = {
+    action: 'closeJob',
+    rowIndex: selectedJob._rowIndex,
+    machineName: selectedJob['เครื่องจักร'],
+    techName: currentUser.name,
+    repairDetail: detail,
+    partsUsed: document.getElementById('repair-parts').value.trim() || '-',
+    repairHours: document.getElementById('repair-hours').value || '-',
+    closeTimestamp: nowISO(),
+    status: 'Success'
+  };
+  try {
+    // ใช้ fetch แบบปกติเพื่อให้ GAS รับข้อมูลได้ถูกต้อง
+    const res = await fetch(GAS_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(payload)
+    });
+    showToast('✅ ปิดงานซ่อมเสร็จแล้ว!', 'success');
+    // อัปเดต UI ทันทีโดยไม่รอ GAS
+    if (selectedJob) {
+      selectedJob['สถานะ'] = 'Success';
+    }
+    setTimeout(() => { showPage('page-jobboard'); fetchJobs(); }, 1500);
+  } catch(e) {
+    showToast('❌ บันทึกไม่สำเร็จ', 'error');
+  } finally {
+    btn.disabled = false; btn.innerHTML = '<span>✅</span> บันทึกและปิดงานซ่อม';
+  }
+}
+ 
+// ══════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = `toast ${type}`;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+</script>
+ 
+<!--
+════════════════════════════════════════════════════════
+  GOOGLE APPS SCRIPT V2 — คัดลอกโค้ดด้านล่างนี้ไปวางใน GAS
+════════════════════════════════════════════════════════
+ 
+const SHEET_ID = 'YOUR_GOOGLE_SHEET_ID_HERE';
+ 
+function doPost(e) {
+  try {
+    const data = JSON.parse(e.postData.contents);
+    const ss = SpreadsheetApp.openById(SHEET_ID);
+ 
+    if (data.action === 'submitJob') {
+      let sheet = ss.getSheetByName('DataLog');
+      if (!sheet) sheet = ss.insertSheet('DataLog');
+      if (sheet.getLastRow() === 0) {
+        sheet.appendRow(['Timestamp','ผู้แจ้ง','แผนก','เครื่องจักร','มอบหมายให้','ประเภทงาน','อาการที่พบ','หมายเหตุ','สถานะ','ช่างที่ซ่อม','รายละเอียดการซ่อม','อะไหล่ที่ใช้','ชั่วโมงซ่อม','เวลาปิดงาน']);
+      }
+      sheet.appendRow([data.timestamp,data.reporterName,data.department,data.machineName,data.assignedTo,data.jobType,data.issues,data.remark,'Pending','','','','','']);
+    }
+ 
+    if (data.action === 'closeJob') {
+      const sheet = ss.getSheetByName('DataLog');
+      const rows = sheet.getDataRange().getValues();
+      for (let i = rows.length - 1; i >= 1; i--) {
+        if (rows[i][3] === data.machineName && rows[i][8] === 'Pending') {
+          sheet.getRange(i+1, 9).setValue('Success');
+          sheet.getRange(i+1, 10).setValue(data.techName);
+          sheet.getRange(i+1, 11).setValue(data.repairDetail);
+          sheet.getRange(i+1, 12).setValue(data.partsUsed);
+          sheet.getRange(i+1, 13).setValue(data.repairHours);
+          sheet.getRange(i+1, 14).setValue(data.closeTimestamp);
+          break;
+        }
+      }
+    }
+ 
+    return ContentService.createTextOutput(JSON.stringify({status:'success'})).setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({status:'error',message:err.toString()})).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+ 
+function doGet(e) {
+  try {
+    const ss = SpreadsheetApp.openById(SHEET_ID);
+    const sheet = ss.getSheetByName('DataLog');
+    if (!sheet || sheet.getLastRow() <= 1) {
+      return ContentService.createTextOutput(JSON.stringify({jobs:[]})).setMimeType(ContentService.MimeType.JSON);
+    }
+    const rows = sheet.getDataRange().getValues();
+    const headers = rows[0];
+    const jobs = rows.slice(1).map((row, i) => {
+      const obj = {};
+      headers.forEach((h, j) => obj[h] = row[j]);
+      obj._rowIndex = i + 2;
+      return obj;
+    }).filter(j => j['สถานะ'] === 'Pending');
+    return ContentService.createTextOutput(JSON.stringify({jobs})).setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({jobs:[],error:err.toString()})).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+ 
+════════════════════════════════════════════════════════
+  ตาราง Users บน Google Sheet (สร้าง Sheet ชื่อ "Users")
+════════════════════════════════════════════════════════
+  | Username | Password | Name                    | Role       |
+  | prod01   | 1234     | นายสมศักดิ์ (ฝ่ายผลิต)  | Reporter   |
+  | prod02   | 1234     | นางสาวสุดา (ผู้ตรวจ)    | Reporter   |
+  | tech01   | 5678     | ช่างสมชาย               | Technician |
+  | tech02   | 5678     | ช่างวิชัย               | Technician |
+  | tech03   | 5678     | ช่างประเสริฐ            | Technician |
+  | tech04   | 5678     | ช่างสุรชัย              | Technician |
+════════════════════════════════════════════════════════
+-->
+</body>
+</html>
+ 
