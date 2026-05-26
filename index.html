@@ -258,6 +258,66 @@ textarea{
 textarea:focus{outline:none;border-color:var(--blue)}
 textarea::placeholder{color:var(--text-dim)}
  
+/* ══════════════════════════════
+   PHOTO UPLOAD (Reporter)
+══════════════════════════════ */
+.photo-uploader{
+  background:var(--surface2);border:2px dashed var(--border);
+  border-radius:var(--radius-sm);padding:20px 16px;text-align:center;
+  cursor:pointer;transition:all 0.2s;
+}
+.photo-uploader:active{transform:scale(0.98)}
+.photo-uploader.has-photo{border-style:solid;border-color:var(--accent);padding:12px}
+.photo-uploader .pu-icon{font-size:32px;display:block;margin-bottom:8px}
+.photo-uploader .pu-title{font-size:14px;font-weight:600;color:var(--text)}
+.photo-uploader .pu-sub{font-size:11px;color:var(--text-muted);margin-top:4px}
+.photo-preview-box{position:relative;width:100%;border-radius:var(--radius-sm);overflow:hidden}
+.photo-preview-box img{width:100%;display:block;max-height:280px;object-fit:cover}
+.photo-remove-btn{
+  position:absolute;top:8px;right:8px;
+  background:rgba(10,12,18,0.85);border:1px solid var(--border2);
+  border-radius:8px;width:34px;height:34px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;color:var(--red);cursor:pointer;
+}
+.photo-filename{
+  font-size:11px;color:var(--text-muted);margin-top:8px;
+  font-family:'IBM Plex Mono',monospace;word-break:break-all;
+}
+
+/* รูปฝั่งช่าง (Job Board / Repair Log) */
+.job-photo-thumb{
+  width:100%;border-radius:var(--radius-sm);overflow:hidden;
+  border:1px solid var(--border);margin-top:10px;cursor:pointer;position:relative;
+}
+.job-photo-thumb img{width:100%;display:block;max-height:200px;object-fit:cover}
+.job-photo-thumb .jp-tag{
+  position:absolute;bottom:8px;left:8px;
+  background:rgba(10,12,18,0.85);border-radius:6px;padding:3px 8px;
+  font-size:11px;color:var(--text);font-family:'IBM Plex Mono',monospace;
+}
+.job-photo-link{
+  display:inline-flex;align-items:center;gap:6px;margin-top:8px;
+  background:var(--blue-dim);border:1px solid rgba(59,130,246,0.3);
+  border-radius:var(--radius-xs);padding:8px 12px;font-size:13px;
+  color:var(--blue);text-decoration:none;font-weight:600;
+}
+.no-photo-note{font-size:12px;color:var(--text-dim);margin-top:10px;font-style:italic}
+
+/* รูปขยายเต็มจอ (lightbox) */
+.lightbox{
+  position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:1000;
+  display:none;align-items:center;justify-content:center;padding:20px;
+}
+.lightbox.show{display:flex}
+.lightbox img{max-width:100%;max-height:90vh;border-radius:8px}
+.lightbox-close{
+  position:absolute;top:16px;right:16px;width:44px;height:44px;
+  background:var(--surface2);border:1px solid var(--border2);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;color:var(--text);cursor:pointer;
+}
+
 /* submit */
 .submit-wrap{padding:0 16px}
 .submit-btn{
@@ -482,6 +542,24 @@ textarea::placeholder{color:var(--text-dim)}
           <div class="dept-btn" onclick="selectDept(this,'แยกน้ำมัน-เมล็ดใน')"><span class="di">🛢️</span><div class="dn">แยกน้ำมัน-เมล็ดใน</div></div>
         </div>
         <div id="machine-wrap"><div class="machine-placeholder">← เลือกแผนกก่อน</div></div>
+
+        <!-- ช่องถ่าย/แนบรูปเครื่องจักร -->
+        <div style="margin-top:14px">
+          <label class="field-label" style="margin-bottom:8px">📷 รูปเครื่องจักร <span style="font-weight:400;color:var(--text-dim)">(ถ่าย/แนบ เพื่อให้ช่างเห็นเครื่องตัวจริง)</span></label>
+          <input type="file" id="machine-photo-input" accept="image/*" capture="environment" style="display:none" onchange="handlePhotoSelect(event)" />
+          <div id="photo-uploader" class="photo-uploader" onclick="document.getElementById('machine-photo-input').click()">
+            <span class="pu-icon">📸</span>
+            <div class="pu-title">แตะเพื่อถ่ายรูป / เลือกรูป</div>
+            <div class="pu-sub">รองรับไฟล์ภาพ (จะถูกย่อขนาดอัตโนมัติ)</div>
+          </div>
+          <div id="photo-preview-wrap" style="display:none">
+            <div class="photo-preview-box">
+              <img id="photo-preview-img" src="" alt="รูปเครื่องจักร" />
+              <div class="photo-remove-btn" onclick="removePhoto(event)">✕</div>
+            </div>
+            <div class="photo-filename" id="photo-filename"></div>
+          </div>
+        </div>
       </div>
     </div>
  
@@ -643,6 +721,8 @@ textarea::placeholder{color:var(--text-dim)}
       <div class="job-summary-row" id="rs-tags"></div>
       <div style="margin-top:8px;font-size:12px;color:var(--text-muted)" id="rs-reporter"></div>
       <div style="margin-top:4px;font-size:12px;color:var(--text-muted)" id="rs-issues"></div>
+      <!-- รูปเครื่องจักรที่ผู้แจ้งส่งมา -->
+      <div id="rs-photo-wrap"></div>
     </div>
  
     <!-- กรอกรายละเอียดการซ่อม -->
@@ -685,6 +765,12 @@ textarea::placeholder{color:var(--text-dim)}
   </div>
 </div>
  
+<!-- LIGHTBOX (ดูรูปเต็มจอ) -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <div class="lightbox-close">✕</div>
+  <img id="lightbox-img" src="" alt="รูปขยาย" />
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
  
@@ -692,7 +778,7 @@ textarea::placeholder{color:var(--text-dim)}
 // ══════════════════════════════════════════════
 // CONFIG — ใส่ GAS URL ของคุณตรงนี้
 // ══════════════════════════════════════════════
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbxZcovibX5Zj-qktEvtkn3OJlpaoRdFYzQEILpBCWYcwPBL5r7eDAEBqab2lf_BnCt0gQ/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxHOQRNrDM97RrCFmH5vskRj3KrjWCvkU2v_BbNM9UcreRyOLw839o4kxGs8I0on3ow-w/exec';
 // ตัวอย่าง:
 // const GAS_URL = 'https://script.google.com/macros/s/AKfycby.../exec';
  
@@ -700,7 +786,7 @@ const GAS_URL = 'https://script.google.com/macros/s/AKfycbxZcovibX5Zj-qktEvtkn3O
 // STATE
 // ══════════════════════════════════════════════
 let currentUser = null; // { username, name, role }
-let formState = { dept:'', machine:'', worker:'', jobType:'', symptoms:[], remark:'' };
+let formState = { dept:'', machine:'', worker:'', jobType:'', symptoms:[], remark:'', photoData:'', photoName:'' };
 let selectedJob = null; // งานที่ช่างเลือก
  
 // ══════════════════════════════════════════════
@@ -735,8 +821,12 @@ setInterval(() => {
 // ══════════════════════════════════════════════
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  window.scrollTo(0,0);
+  const target = document.getElementById(id);
+  target.classList.add('active');
+  // รีเซ็ตการเลื่อนหน้าให้ขึ้นบนสุดทันที เหมือนเปลี่ยนไปอีกหน้าจริงๆ
+  window.scrollTo(0, 0);
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
 }
  
 // ══════════════════════════════════════════════
@@ -832,6 +922,73 @@ function markFilled(secId, numId) {
   document.getElementById(secId).classList.add('filled');
   document.getElementById(numId).textContent = '✓';
 }
+
+// ══════════════════════════════════════════════
+// PHOTO HANDLING (Reporter) — ย่อรูปเป็น JPG ก่อนส่ง
+// ══════════════════════════════════════════════
+function handlePhotoSelect(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      // ย่อขนาดให้ด้านยาวสุดไม่เกิน 1280px เพื่อลดขนาดไฟล์
+      const maxSide = 1280;
+      let w = img.width, h = img.height;
+      if (w > h && w > maxSide) { h = Math.round(h * maxSide / w); w = maxSide; }
+      else if (h >= w && h > maxSide) { w = Math.round(w * maxSide / h); h = maxSide; }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, w, h);
+      ctx.drawImage(img, 0, 0, w, h);
+      // แปลงเป็น JPG คุณภาพ 0.8
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+      formState.photoData = dataUrl;
+      // ตั้งชื่อไฟล์อัตโนมัติจากเครื่องจักร + เวลา
+      const safeMachine = (formState.machine || 'machine').replace(/[^a-zA-Z0-9ก-๙]/g, '_').slice(0, 30);
+      const n = new Date(), p = x => String(x).padStart(2, '0');
+      const stamp = `${n.getFullYear()}${p(n.getMonth()+1)}${p(n.getDate())}_${p(n.getHours())}${p(n.getMinutes())}${p(n.getSeconds())}`;
+      formState.photoName = `${safeMachine}_${stamp}.jpg`;
+      // แสดงพรีวิว
+      document.getElementById('photo-preview-img').src = dataUrl;
+      document.getElementById('photo-filename').textContent = '📎 ' + formState.photoName;
+      document.getElementById('photo-preview-wrap').style.display = 'block';
+      document.getElementById('photo-uploader').classList.add('has-photo');
+      document.getElementById('photo-uploader').querySelector('.pu-title').textContent = 'แตะเพื่อเปลี่ยนรูป';
+      document.getElementById('photo-uploader').querySelector('.pu-icon').textContent = '🔄';
+      document.getElementById('photo-uploader').querySelector('.pu-sub').textContent = 'มีรูปแล้ว — แตะเพื่อถ่าย/เลือกใหม่';
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function removePhoto(event) {
+  event.stopPropagation();
+  formState.photoData = '';
+  formState.photoName = '';
+  document.getElementById('machine-photo-input').value = '';
+  document.getElementById('photo-preview-wrap').style.display = 'none';
+  const u = document.getElementById('photo-uploader');
+  u.classList.remove('has-photo');
+  u.querySelector('.pu-title').textContent = 'แตะเพื่อถ่ายรูป / เลือกรูป';
+  u.querySelector('.pu-icon').textContent = '📸';
+  u.querySelector('.pu-sub').textContent = 'รองรับไฟล์ภาพ (จะถูกย่อขนาดอัตโนมัติ)';
+}
+
+// ══════════════════════════════════════════════
+// LIGHTBOX (ดูรูปเต็มจอ)
+// ══════════════════════════════════════════════
+function openLightbox(src) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox').classList.add('show');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('show');
+}
  
 async function submitReport() {
   formState.remark = document.getElementById('remark').value.trim();
@@ -852,6 +1009,8 @@ async function submitReport() {
     jobType: formState.jobType,
     issues: formState.symptoms.join(', ') || '-',
     remark: formState.remark || '-',
+    photoData: formState.photoData || '',
+    photoName: formState.photoName || '',
     status: 'Pending'
   };
   try {
@@ -866,11 +1025,19 @@ async function submitReport() {
 }
  
 function resetReporterForm() {
-  formState = { dept:'', machine:'', worker:'', jobType:'', symptoms:[], remark:'' };
+  formState = { dept:'', machine:'', worker:'', jobType:'', symptoms:[], remark:'', photoData:'', photoName:'' };
   document.querySelectorAll('.dept-btn,.worker-btn,.job-btn').forEach(b=>b.classList.remove('selected'));
   document.querySelectorAll('.symptom-item').forEach(b=>{ b.classList.remove('checked'); b.querySelector('.s-check').textContent=''; });
   document.getElementById('machine-wrap').innerHTML = '<div class="machine-placeholder">← เลือกแผนกก่อน</div>';
   document.getElementById('remark').value = '';
+  // ล้างรูป
+  document.getElementById('machine-photo-input').value = '';
+  document.getElementById('photo-preview-wrap').style.display = 'none';
+  const u = document.getElementById('photo-uploader');
+  u.classList.remove('has-photo');
+  u.querySelector('.pu-title').textContent = 'แตะเพื่อถ่ายรูป / เลือกรูป';
+  u.querySelector('.pu-icon').textContent = '📸';
+  u.querySelector('.pu-sub').textContent = 'รองรับไฟล์ภาพ (จะถูกย่อขนาดอัตโนมัติ)';
   ['sec-machine','sec-worker','sec-jobtype'].forEach(id=>document.getElementById(id).classList.remove('filled'));
   ['sn-1','sn-2','sn-3'].forEach((id,i)=>{ document.getElementById(id).textContent=i+1; });
 }
@@ -925,7 +1092,7 @@ function renderJobs(jobs) {
         <span class="job-tag type-${j['ประเภทงาน']}">${j['ประเภทงาน'] || '-'}</span>
         ${j['อาการที่พบ'] && j['อาการที่พบ']!=='-' ? `<span class="job-tag">${j['อาการที่พบ'].split(',')[0]}${j['อาการที่พบ'].includes(',')?'...':''}</span>` : ''}
       </div>
-      <div class="job-reporter">👤 แจ้งโดย: ${j['ผู้แจ้ง'] || '-'}</div>
+      <div class="job-reporter">👤 แจ้งโดย: ${j['ผู้แจ้ง'] || '-'}${(j['รูปภาพ'] && /^https?:\/\//.test(j['รูปภาพ'])) ? ' &nbsp;·&nbsp; 📷 มีรูปแนบ' : ''}</div>
       <div class="job-card-arrow">→</div>
     </div>
   `).join('');
@@ -942,6 +1109,19 @@ function openJob(idx) {
   tags.innerHTML = `<span class="job-tag type-${selectedJob['ประเภทงาน']}">${selectedJob['ประเภทงาน']}</span><span class="job-tag">🏭 ${selectedJob['แผนก']}</span>`;
   document.getElementById('rs-reporter').textContent = `แจ้งโดย: ${selectedJob['ผู้แจ้ง'] || '-'}  |  ${selectedJob['Timestamp'] || ''}`;
   document.getElementById('rs-issues').textContent = selectedJob['อาการที่พบ'] && selectedJob['อาการที่พบ']!=='-' ? `อาการ: ${selectedJob['อาการที่พบ']}` : '';
+  // แสดงรูปเครื่องจักรที่ผู้แจ้งส่งมา (ถ้ามี)
+  const photoWrap = document.getElementById('rs-photo-wrap');
+  const photoUrl = selectedJob['รูปภาพ'] || '';
+  if (photoUrl && photoUrl !== '-' && /^https?:\/\//.test(photoUrl)) {
+    photoWrap.innerHTML = `
+      <div class="job-photo-thumb" onclick="openLightbox('${photoUrl}')">
+        <img src="${photoUrl}" alt="รูปเครื่องจักร" onerror="this.parentElement.style.display='none';document.getElementById('rs-photo-fallback').style.display='inline-flex'" />
+        <span class="jp-tag">📷 แตะเพื่อดูเต็มจอ</span>
+      </div>
+      <a id="rs-photo-fallback" class="job-photo-link" href="${photoUrl}" target="_blank" rel="noopener" style="display:none">🔗 เปิดดูรูปเครื่องจักร</a>`;
+  } else {
+    photoWrap.innerHTML = `<div class="no-photo-note">📷 ไม่มีรูปแนบจากผู้แจ้ง</div>`;
+  }
   document.getElementById('repair-detail').value = '';
   document.getElementById('repair-parts').value = '';
   document.getElementById('repair-hours').value = '';
@@ -1004,47 +1184,84 @@ function showToast(msg, type) {
  
 <!--
 ════════════════════════════════════════════════════════
-  GOOGLE APPS SCRIPT V2 — คัดลอกโค้ดด้านล่างนี้ไปวางใน GAS
+  GOOGLE APPS SCRIPT V3 — รองรับรูปภาพ (คัดลอกไปวางใน GAS)
 ════════════════════════════════════════════════════════
- 
+  หมายเหตุ: คอลัมน์ "รูปภาพ" เพิ่มใหม่ อยู่ระหว่าง "หมายเหตุ"(H) กับ "สถานะ"(I)
+  โครงสร้างคอลัมน์ใหม่ (A→O):
+  A:Timestamp B:ผู้แจ้ง C:แผนก D:เครื่องจักร E:มอบหมายให้ F:ประเภทงาน
+  G:อาการที่พบ H:หมายเหตุ I:รูปภาพ J:สถานะ K:ช่างที่ซ่อม
+  L:รายละเอียดการซ่อม M:อะไหล่ที่ใช้ N:ชั่วโมงซ่อม O:เวลาปิดงาน
+
 const SHEET_ID = 'YOUR_GOOGLE_SHEET_ID_HERE';
- 
+// โฟลเดอร์ Drive สำหรับเก็บรูป (สร้างโฟลเดอร์ใน Drive แล้วเอา ID มาใส่)
+// ถ้าเว้นว่าง ระบบจะสร้างโฟลเดอร์ชื่อ "RepairPhotos" ให้อัตโนมัติ
+const PHOTO_FOLDER_ID = '';
+
+// หาหรือสร้างโฟลเดอร์เก็บรูป
+function getPhotoFolder() {
+  if (PHOTO_FOLDER_ID) return DriveApp.getFolderById(PHOTO_FOLDER_ID);
+  const folders = DriveApp.getFoldersByName('RepairPhotos');
+  if (folders.hasNext()) return folders.next();
+  return DriveApp.createFolder('RepairPhotos');
+}
+
+// บันทึกรูป base64 ลง Drive แล้วคืนลิงก์เปิดดู
+function savePhotoToDrive(base64Data, fileName) {
+  try {
+    if (!base64Data) return '';
+    // ตัดส่วน "data:image/jpeg;base64," ออก
+    const clean = base64Data.replace(/^data:image\/\w+;base64,/, '');
+    const blob = Utilities.newBlob(Utilities.base64Decode(clean), 'image/jpeg', fileName || ('photo_' + Date.now() + '.jpg'));
+    const folder = getPhotoFolder();
+    const file = folder.createFile(blob);
+    // ตั้งสิทธิ์ให้ทุกคนที่มีลิงก์เปิดดูได้
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    // ลิงก์เปิดดูรูปแบบ preview
+    return 'https://drive.google.com/uc?export=view&id=' + file.getId();
+  } catch (err) {
+    return '';
+  }
+}
+
 function doPost(e) {
   try {
     const data = JSON.parse(e.postData.contents);
     const ss = SpreadsheetApp.openById(SHEET_ID);
- 
+
     if (data.action === 'submitJob') {
       let sheet = ss.getSheetByName('DataLog');
       if (!sheet) sheet = ss.insertSheet('DataLog');
       if (sheet.getLastRow() === 0) {
-        sheet.appendRow(['Timestamp','ผู้แจ้ง','แผนก','เครื่องจักร','มอบหมายให้','ประเภทงาน','อาการที่พบ','หมายเหตุ','สถานะ','ช่างที่ซ่อม','รายละเอียดการซ่อม','อะไหล่ที่ใช้','ชั่วโมงซ่อม','เวลาปิดงาน']);
+        sheet.appendRow(['Timestamp','ผู้แจ้ง','แผนก','เครื่องจักร','มอบหมายให้','ประเภทงาน','อาการที่พบ','หมายเหตุ','รูปภาพ','สถานะ','ช่างที่ซ่อม','รายละเอียดการซ่อม','อะไหล่ที่ใช้','ชั่วโมงซ่อม','เวลาปิดงาน']);
       }
-      sheet.appendRow([data.timestamp,data.reporterName,data.department,data.machineName,data.assignedTo,data.jobType,data.issues,data.remark,'Pending','','','','','']);
+      // อัปโหลดรูป (ถ้ามี) แล้วได้ลิงก์มาเก็บในคอลัมน์ I
+      const photoLink = savePhotoToDrive(data.photoData, data.photoName);
+      sheet.appendRow([data.timestamp,data.reporterName,data.department,data.machineName,data.assignedTo,data.jobType,data.issues,data.remark,photoLink,'Pending','','','','','']);
     }
- 
+
     if (data.action === 'closeJob') {
       const sheet = ss.getSheetByName('DataLog');
       const rows = sheet.getDataRange().getValues();
+      // คอลัมน์สถานะตอนนี้คือ index 9 (คอลัมน์ J = ที่ 10)
       for (let i = rows.length - 1; i >= 1; i--) {
-        if (rows[i][3] === data.machineName && rows[i][8] === 'Pending') {
-          sheet.getRange(i+1, 9).setValue('Success');
-          sheet.getRange(i+1, 10).setValue(data.techName);
-          sheet.getRange(i+1, 11).setValue(data.repairDetail);
-          sheet.getRange(i+1, 12).setValue(data.partsUsed);
-          sheet.getRange(i+1, 13).setValue(data.repairHours);
-          sheet.getRange(i+1, 14).setValue(data.closeTimestamp);
+        if (rows[i][3] === data.machineName && rows[i][9] === 'Pending') {
+          sheet.getRange(i+1, 10).setValue('Success');          // J สถานะ
+          sheet.getRange(i+1, 11).setValue(data.techName);       // K ช่างที่ซ่อม
+          sheet.getRange(i+1, 12).setValue(data.repairDetail);   // L รายละเอียดการซ่อม
+          sheet.getRange(i+1, 13).setValue(data.partsUsed);      // M อะไหล่ที่ใช้
+          sheet.getRange(i+1, 14).setValue(data.repairHours);    // N ชั่วโมงซ่อม
+          sheet.getRange(i+1, 15).setValue(data.closeTimestamp); // O เวลาปิดงาน
           break;
         }
       }
     }
- 
+
     return ContentService.createTextOutput(JSON.stringify({status:'success'})).setMimeType(ContentService.MimeType.JSON);
   } catch(err) {
     return ContentService.createTextOutput(JSON.stringify({status:'error',message:err.toString()})).setMimeType(ContentService.MimeType.JSON);
   }
 }
- 
+
 function doGet(e) {
   try {
     const ss = SpreadsheetApp.openById(SHEET_ID);
@@ -1065,7 +1282,15 @@ function doGet(e) {
     return ContentService.createTextOutput(JSON.stringify({jobs:[],error:err.toString()})).setMimeType(ContentService.MimeType.JSON);
   }
 }
- 
+
+════════════════════════════════════════════════════════
+  ⚠️ สิ่งที่ต้องทำหลังวางโค้ดนี้:
+  1. ใส่ SHEET_ID ของคุณ
+  2. ถ้ามีชีต DataLog เดิมอยู่แล้ว → แทรกคอลัมน์ใหม่ชื่อ "รูปภาพ"
+     ระหว่าง "หมายเหตุ"(H) กับ "สถานะ"(I) ด้วยมือ 1 ครั้ง
+     หรือสร้างชีตใหม่ให้ระบบ generate header เอง
+  3. Deploy ใหม่ (Manage deployments → New version) เพื่อให้สิทธิ์ Drive ทำงาน
+     ครั้งแรกที่รันจะขออนุญาตเข้าถึง Google Drive — กดอนุญาต
 ════════════════════════════════════════════════════════
   ตาราง Users บน Google Sheet (สร้าง Sheet ชื่อ "Users")
 ════════════════════════════════════════════════════════
