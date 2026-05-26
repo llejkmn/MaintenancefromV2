@@ -38,6 +38,7 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min
 ══════════════════════════════ */
 .page{display:none;min-height:100vh;animation:fadeIn 0.3s ease}
 .page.active{display:block}
+.page:not(.active){display:none !important}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
  
 /* ══════════════════════════════
@@ -84,11 +85,13 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min
    PAGE 1: LOGIN
 ══════════════════════════════ */
 #page-login{
-  display:flex;flex-direction:column;
+  display:none;
+  flex-direction:column;
   justify-content:center;align-items:center;
   min-height:100vh;padding:32px 24px;
   background:radial-gradient(ellipse at 50% 0%,rgba(59,130,246,0.08) 0%,transparent 70%);
 }
+#page-login.active{display:flex}
 .login-logo{
   width:72px;height:72px;border-radius:20px;
   background:linear-gradient(135deg,var(--accent),var(--orange));
@@ -778,7 +781,7 @@ textarea::placeholder{color:var(--text-dim)}
 // ══════════════════════════════════════════════
 // CONFIG — ใส่ GAS URL ของคุณตรงนี้
 // ══════════════════════════════════════════════
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbxHOQRNrDM97RrCFmH5vskRj3KrjWCvkU2v_BbNM9UcreRyOLw839o4kxGs8I0on3ow-w/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwZQshu4Ke8J9rPfiyxji4QFQb8TrLPxhHuoYPIXbFexdFAp_qtOJ2YtyaR67-tNh5Kgg/exec';
 // ตัวอย่าง:
 // const GAS_URL = 'https://script.google.com/macros/s/AKfycby.../exec';
  
