@@ -603,10 +603,8 @@ textarea::placeholder{color:var(--text-dim)}
   </div>
  
   <div class="board-body">
-    <div class="board-stats">
-      <div class="stat-card pending"><div class="stat-num" id="stat-pending">0</div><div class="stat-label">รอดำเนินการ</div></div>
-      <div class="stat-card inprog"><div class="stat-num" id="stat-inprog">0</div><div class="stat-label">กำลังซ่อม</div></div>
-      <div class="stat-card done"><div class="stat-num" id="stat-done">0</div><div class="stat-label">เสร็จแล้ว</div></div>
+    <div class="board-stats" style="grid-template-columns:1fr">
+      <div class="stat-card pending"><div class="stat-num" id="stat-pending">0</div><div class="stat-label">งานที่รอดำเนินการของคุณ</div></div>
     </div>
  
     <div class="section-label">🔴 งานที่รอดำเนินการ</div>
@@ -907,9 +905,9 @@ async function fetchJobs() {
 function renderJobs(jobs) {
   const myName = currentUser ? currentUser.name : '';
   const myJobs = jobs.filter(j => j['สถานะ'] === 'Pending' && j['มอบหมายให้'] === myName);
-  document.getElementById('stat-pending').textContent = jobs.filter(j=>j['สถานะ']==='Pending').length;
-  document.getElementById('stat-inprog').textContent = jobs.filter(j=>j['สถานะ']==='InProgress').length;
-  document.getElementById('stat-done').textContent = jobs.filter(j=>j['สถานะ']==='Success').length;
+  // นับเฉพาะงาน Pending ที่มอบหมายให้ตัวเอง
+  const myName2 = currentUser ? currentUser.name : '';
+  document.getElementById('stat-pending').textContent = jobs.filter(j=>j['สถานะ']==='Pending' && j['มอบหมายให้']===myName2).length;
   const list = document.getElementById('job-list');
   if (myJobs.length === 0) {
     list.innerHTML = '<div class="empty-state"><div class="empty-icon">✅</div><p>ไม่มีงานค้างอยู่สำหรับคุณ</p></div>';
